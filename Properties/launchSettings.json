@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "YoutubeDL (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "YoutubeDL (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
