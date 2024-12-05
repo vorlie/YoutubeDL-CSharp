@@ -60,7 +60,7 @@
              VerticalAlignment="Top" 
              Margin="0,0,0,20"/>
         </ScrollViewer>
-        <ProgressBar x:Name="DownloadProgressBar" IsIndeterminate="True" Visibility="Visible" Margin="0,-20,0,0" Grid.Row="4"/>
+        <ProgressBar x:Name="DownloadProgressBar" IsIndeterminate="True" Visibility="Collapsed" Margin="0,-20,0,0" Grid.Row="4"/>
     </Grid>
 
     <Window.SystemBackdrop>
