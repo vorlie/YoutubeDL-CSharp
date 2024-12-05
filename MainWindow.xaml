@@ -15,8 +15,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <!-- For resizable OutputTextBox -->
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid x:Name="AppTitleBar" Background="Transparent">
             <!-- Width of the padding columns is set in LayoutMetricsChanged handler. -->
@@ -52,8 +51,7 @@
 
         <Button Content="Download" Click="DownloadButton_Click" Margin="160,28,0,20" Grid.Row="2"/>
 
-
-        <ScrollViewer x:Name="OutputScrollViewer" VerticalScrollBarVisibility="Auto" Grid.Row="4">
+        <ScrollViewer x:Name="OutputScrollViewer" VerticalScrollBarVisibility="Auto" Grid.Row="3">
             <TextBox x:Name="OutputTextBox" 
              IsReadOnly="True" 
              AcceptsReturn="True" 
@@ -62,7 +60,7 @@
              VerticalAlignment="Top" 
              Margin="0,0,0,20"/>
         </ScrollViewer>
-        <ProgressBar x:Name="DownloadProgressBar" IsIndeterminate="True" Visibility="Collapsed" Margin="0,-20,0,0" Grid.Row="5"/>
+        <ProgressBar x:Name="DownloadProgressBar" IsIndeterminate="True" Visibility="Visible" Margin="0,-20,0,0" Grid.Row="4"/>
     </Grid>
 
     <Window.SystemBackdrop>

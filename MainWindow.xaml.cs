@@ -50,9 +50,10 @@ namespace YoutubeDL
         private async void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
             string url = UrlTextBox.Text;
-            string quality = (QualityComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
+            var selectedItem = QualityComboBox.SelectedItem as ComboBoxItem;
+            string quality = selectedItem != null ? selectedItem.Content?.ToString() ?? string.Empty : string.Empty;
 
-            if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(quality))
+            if (string.IsNullOrWhiteSpace(url) || QualityComboBox.SelectedItem == null)
             {
                 ContentDialog dialog = new ContentDialog
                 {
@@ -72,7 +73,7 @@ namespace YoutubeDL
             string selectedExtension = quality == "Audio-only" ? "mp3" : "mp4"; // Default to mp4 for video
 
             // Build yt-dlp command arguments
-            string formatCode = GetFormatCode(quality, selectedExtension);
+            string formatCode = GetFormatCode(quality);
             string arguments = $"-f {formatCode} -o \"%(title)s.{selectedExtension}\" {url}";
 
             // If audio is selected (mp3), force audio extraction and conversion
@@ -81,29 +82,27 @@ namespace YoutubeDL
                 arguments = $"-f bestaudio -x --audio-format mp3 -o \"%(title)s.%(ext)s\" {url}";
             }
 
+            if (quality == "best")
+            {
+                AppendOutput("Warning: Defaulting to 'best' quality as no valid quality was selected.");
+            }
+
             // Start the download process
             DownloadProgressBar.Visibility = Visibility.Visible;
             await RunYtDlpAsync(arguments, selectedExtension);
             DownloadProgressBar.Visibility = Visibility.Collapsed;
         }
 
-        private string GetFormatCode(string quality, string extension)
+        private string GetFormatCode(string quality)
         {
-            if (extension == "mp3")
+            return quality switch
             {
-                return "bestaudio";
-            }
-            else if (extension == "mp4")
-            {
-                return quality switch
-                {
-                    "1080p" => "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
-                    "720p" => "bestvideo[height<=720]+bestaudio/best[height<=720]",
-                    "Audio-only" => "bestaudio",
-                    _ => "best"
-                };
-            }
-            return "best";
+                "1080p" => "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
+                "720p" => "bestvideo[height<=720]+bestaudio/best[height<=720]",
+                "Audio-only" => "bestaudio",
+                _ => "best"
+            };
+
         }
 
         private async Task RunYtDlpAsync(string arguments, string selectedExtension)
