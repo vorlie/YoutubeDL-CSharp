@@ -91,6 +91,19 @@ namespace YoutubeDL
             DownloadProgressBar.Visibility = Visibility.Visible;
             await RunYtDlpAsync(arguments, selectedExtension);
             DownloadProgressBar.Visibility = Visibility.Collapsed;
+
+            string userHome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string downloadPath = Path.Combine(userHome, "Downloads");
+            var mostRecentFile = Directory.GetFiles(downloadPath)
+                .Select(file => new FileInfo(file))
+                .OrderByDescending(fileInfo => fileInfo.CreationTime)
+                .FirstOrDefault();
+
+            if (mostRecentFile != null)
+            {
+                // Show the popup with the file path
+                await ShowDownloadCompleteDialog(mostRecentFile.FullName);
+            }
         }
 
         private string GetFormatCode(string quality)
@@ -172,6 +185,26 @@ namespace YoutubeDL
                         OutputScrollViewer.ChangeView(null, OutputScrollViewer.ExtentHeight, null);
                     }
                 });
+            }
+        }
+
+        private async Task ShowDownloadCompleteDialog(string downloadedFilePath)
+        {
+            ContentDialog dialog = new ContentDialog
+            {
+                Title = "Download Complete",
+                Content = "Your download has finished. What would you like to do?",
+                PrimaryButtonText = "Show File",
+                CloseButtonText = "Ok",
+                XamlRoot = this.Content.XamlRoot // Ensure the dialog is shown in the correct context
+            };
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                // Open File Explorer and select the file
+                Process.Start("explorer.exe", $"/select,\"{downloadedFilePath}\"");
             }
         }
     }
