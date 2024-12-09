@@ -16,6 +16,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid x:Name="AppTitleBar" Background="Transparent">
             <!-- Width of the padding columns is set in LayoutMetricsChanged handler. -->
@@ -43,14 +44,18 @@
         
         <TextBox x:Name="UrlTextBox" PlaceholderText="Enter YouTube URL" Margin="0,20,0,20" Grid.Row="1"/>
 
-        <ComboBox x:Name="QualityComboBox" Header="Select Quality" Margin="0,0,0,20" Grid.Row="2" Width="140">
+        <ComboBox x:Name="QualityComboBox" Header="Select Quality" Margin="0,0,0,20" Grid.Row="2" Width="140" IsEnabled="False">
+            <ComboBoxItem Content="2160p" />
+            <ComboBoxItem Content="1440p" />
             <ComboBoxItem Content="1080p" IsSelected="True" />
             <ComboBoxItem Content="720p" />
             <ComboBoxItem Content="Audio-only" />
         </ComboBox>
 
-        <Button Content="Download" Click="DownloadButton_Click" Margin="160,28,0,20" Grid.Row="2"/>
+        <Button x:Name="DownloadButton" Content="Download" Click="DownloadButton_Click" Margin="160,28,0,20" Grid.Row="2" IsEnabled="False"/>
 
+        <Button x:Name="CheckFormatsButton" Content="Check Formats" Click="CheckFormatsButton_Click" Margin="270,28,0,20" Grid.Row="2"/>
+        
         <ScrollViewer x:Name="OutputScrollViewer" VerticalScrollBarVisibility="Auto" Grid.Row="3">
             <TextBox x:Name="OutputTextBox" 
              IsReadOnly="True" 
@@ -60,7 +65,17 @@
              VerticalAlignment="Top" 
              Margin="0,0,0,20"/>
         </ScrollViewer>
+        
         <ProgressBar x:Name="DownloadProgressBar" IsIndeterminate="True" Visibility="Collapsed" Margin="0,-20,0,0" Grid.Row="4"/>
+        
+        <TextBlock x:Name="DisclaimerTextBlock" 
+           Text="Note: Please verify the available quality options before proceeding. Some formats may not be available for all videos."
+           Margin="0,0,0,0" 
+           Grid.Row="5" 
+           VerticalAlignment="Bottom"
+           TextWrapping="Wrap" 
+           Foreground="Gray"
+           FontStyle="Italic"/>
     </Grid>
 
     <Window.SystemBackdrop>

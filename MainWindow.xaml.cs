@@ -105,17 +105,83 @@ namespace YoutubeDL
                 await ShowDownloadCompleteDialog(mostRecentFile.FullName);
             }
         }
+        private async void CheckFormatsButton_Click(object sender, RoutedEventArgs e)
+        {
+            string url = UrlTextBox.Text;
+
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                ContentDialog dialog = new ContentDialog
+                {
+                    Title = "Invalid Input",
+                    Content = "Please enter a valid YouTube URL.",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.Content.XamlRoot
+                };
+                await dialog.ShowAsync();
+                return;
+            }
+
+            // Display a message indicating that the formats are being fetched
+            AppendOutput("Fetching available formats... Please wait.");
+
+            // Fetch the available formats using yt-dlp
+            string arguments = $"-F {url}";  // -F option lists available formats
+            DownloadProgressBar.Visibility = Visibility.Visible;
+            await RunYtDlpFormatAsync(arguments);
+            DownloadProgressBar.Visibility = Visibility.Collapsed;
+
+            DownloadButton.IsEnabled = true;
+            QualityComboBox.IsEnabled = true;
+        }
 
         private string GetFormatCode(string quality)
         {
             return quality switch
             {
-                "1080p" => "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
-                "720p" => "bestvideo[height<=720]+bestaudio/best[height<=720]",
+                "2160p" => "bestvideo[width<=3840]+bestaudio/best[width<=3840]",
+                "1440p" => "bestvideo[width<=2560]+bestaudio/best[width<=2560]",
+                "1080p" => "bestvideo[width<=1920]+bestaudio/best[width<=1920]",
+                "720p" => "bestvideo[width<=1280]+bestaudio/best[width<=1280]",
                 "Audio-only" => "bestaudio",
                 _ => "best"
             };
 
+        }
+
+        private async Task RunYtDlpFormatAsync(string arguments)
+        {
+            try
+            {
+                string binariesPath = Path.Combine(AppContext.BaseDirectory, "Resources", "Binaries");
+                string ytDlpPath = Path.Combine(binariesPath, "yt-dlp.exe");
+
+                Process process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = ytDlpPath,
+                        Arguments = arguments,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    }
+                };
+
+                process.OutputDataReceived += (sender, args) => AppendOutput(args.Data);
+                process.ErrorDataReceived += (sender, args) => AppendOutput(args.Data);
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                await process.WaitForExitAsync();
+            }
+            catch (Exception ex)
+            {
+                AppendOutput($"Error: {ex.Message}");
+            }
         }
 
         private async Task RunYtDlpAsync(string arguments, string selectedExtension)
@@ -136,11 +202,11 @@ namespace YoutubeDL
                 if (selectedExtension == "mp4")
                 {
                     string ffmpegPath = Path.Combine(binariesPath, "ffmpeg.exe");
-                    arguments += $" --ffmpeg-location \"{ffmpegPath}\" --merge-output-format {selectedExtension} -o \"{Path.Combine(downloadPath, "%(title)s.%(ext)s")}\"";
+                    arguments += $" --add-metadata --write-thumbnail --embed-thumbnail --ffmpeg-location \"{ffmpegPath}\" --merge-output-format {selectedExtension} -o \"{Path.Combine(downloadPath, "%(title)s.%(ext)s")}\"";
                 }
                 else
                 {
-                    arguments += $" -o \"{Path.Combine(downloadPath, "%(title)s.%(ext)s")}\"";
+                    arguments += $" --add-metadata --write-thumbnail --embed-thumbnail -o \"{Path.Combine(downloadPath, "%(title)s.%(ext)s")}\"";
                 }
 
                 Process process = new Process
@@ -207,5 +273,6 @@ namespace YoutubeDL
                 Process.Start("explorer.exe", $"/select,\"{downloadedFilePath}\"");
             }
         }
+
     }
 }
